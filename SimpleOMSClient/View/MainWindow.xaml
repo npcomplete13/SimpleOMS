@@ -1,0 +1,142 @@
+﻿<Window x:Class="SimpleOMS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleOMS" xmlns:helpers="clr-namespace:SimpleOMSClient.Helpers"
+        mc:Ignorable="d"
+        Title="Simple OMS" Height="600" Width="1024">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <helpers:InvertVisibilityConverter x:Key="InvertVis" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*" />
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Grid.Column="0" Header="Customers">
+                <ListBox Grid.Row="0" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}"/>
+            </GroupBox>
+            <Grid Grid.Column="1" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
+                <GroupBox Grid.Row="0" Header="Orders">
+                    <DataGrid ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Order ID" Binding="{Binding OrderID}"/>
+                            <DataGridTextColumn Header="Order Date" Binding="{Binding OrderDate}"/>
+                            <DataGridTextColumn Header="Customer" Binding="{Binding CustomerID}"/>
+                            <DataGridTextColumn Header="Product ID" Binding="{Binding ProductID}"/>
+                            <DataGridTextColumn Header="Price" Binding="{Binding Quantity}"/>
+                            <DataGridTextColumn Header="Employee ID" Binding="{Binding SalesPersonID}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+                <TabControl Grid.Row="2" SelectedIndex="{Binding TabIndex}" >
+                    <TabItem Header="Order Details">
+                        <GroupBox Grid.Row="2" Header="Order Details">
+                            <Grid >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Order ID"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="Order Date"/>
+                                <Label Grid.Row="2" Grid.Column="0" Content="Customer"/>
+                                <Label Grid.Row="3" Grid.Column="0" Content="Product"/>
+                                <Label Grid.Row="4" Grid.Column="0" Content="Price"/>
+                                <Label Grid.Row="5" Grid.Column="0" Content="Quantity"/>
+
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedOrder.OrderID}" IsEnabled="False"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedOrder.OrderDate, StringFormat=D }" IsEnabled="False" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedCustomer.FullName, Mode=OneWay}" IsEnabled="False"/>
+                                <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Products}" DisplayMemberPath="Name" SelectedValue="{Binding SelectedProduct}" IsEnabled="{Binding EditModeOn}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedProduct.Price}" IsEnabled="False" />
+                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SelectedOrder.Quantity}"/>
+                                <!-- TODO: Validate numbers-->
+                            </Grid>
+                        </GroupBox>
+                    </TabItem>
+                    <TabItem Header="Customer Details">
+                        <GroupBox Grid.Row="2" Header="Customer Details">
+
+                            <Grid >
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Customer ID"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="First Name"/>
+                                <Label Grid.Row="2" Grid.Column="0" Content="Middle Initial"/>
+                                <Label Grid.Row="3" Grid.Column="0" Content="Last Name"/>
+
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedCustomer.CustomerID}" IsEnabled="False"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedCustomer.FirstName}" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedCustomer.MiddleInitial}"  MaxLength="1"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedCustomer.LastName}"/>
+                            </Grid>
+                        </GroupBox>
+                    </TabItem>
+                </TabControl>
+
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Delete" Width="80" HorizontalAlignment="Left" Margin="2,2,2,2" Command="{Binding DeleteOrderCommand}"/>
+                    <Button Grid.Column="1" Content="Create" Width="120" HorizontalAlignment="Left" Margin="2,2,2,2" Command="{Binding CreateNewOrderCommand}"/>
+                    <Button Grid.Column="2" Content="Save" Width="90" HorizontalAlignment="Right" Margin="2,2,2,2" Command="{Binding SaveOrderCommand}"/>
+                </Grid>
+
+
+            </Grid>
+            <GroupBox Grid.Column="2" Header="Messages">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="25"/>
+                    </Grid.RowDefinitions>
+                    <ListBox Grid.Row="0" ItemsSource="{Binding Messages}"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" >
+                        <TextBox HorizontalAlignment="Left" Text="{Binding MessageToSend}" Width="190" Margin="2,2,2,2"/>
+                        <Button Content="Send" HorizontalAlignment="Right" Width="60"  Margin="2,2,2,2" Command="{Binding SendMessageCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <StackPanel Grid.Row="1">
+            <StatusBar>
+                <TextBlock Text="{Binding StatusText}" />
+            </StatusBar>
+        </StackPanel>
+    </Grid>
+</Window>
