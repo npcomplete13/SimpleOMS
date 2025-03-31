@@ -151,12 +151,10 @@ namespace SimpleOMS.ViewModel
 
         
 
-        public ICommand DeleteCustomerCommand { get; }
-        public ICommand EditCustomerCommand { get; }
-        public ICommand NewCustomerCommand { get; }
-        public ICommand DeleteOrderCommand { get; }
-        public ICommand CreateNewOrderCommand { get; }
-        public ICommand SaveOrderCommand { get; }
+        public ICommand EditCommand { get; }
+        public ICommand NewCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand SaveCommand { get; }
         public ICommand SendMessageCommand { get; }
 
         private ObservableCollection<Employee> Employees = new ObservableCollection<Employee>();
@@ -176,12 +174,10 @@ namespace SimpleOMS.ViewModel
             Messages = new ObservableCollection<string>();
             Customers = new ObservableCollection<Customer>();
 
-            DeleteCustomerCommand = new RelayCommand(DeleteCustomer);
-            EditCustomerCommand = new RelayCommand(EditCustomer);
-            NewCustomerCommand = new RelayCommand(NewCustomer);
-            DeleteOrderCommand = new RelayCommand(DeleteOrder);
-            CreateNewOrderCommand = new RelayCommand(CreateNewOrder);
-            SaveOrderCommand = new RelayCommand(SaveOrder);
+            EditCommand = new RelayCommand(Edit);
+            DeleteCommand = new RelayCommand(Delete);
+            NewCommand = new RelayCommand(New);
+            SaveCommand = new RelayCommand(Save);
             SendMessageCommand = new RelayCommand(SendMessage);
 
             Task.Factory.StartNew(async () => await LoadDataAndConnectServices());
@@ -272,47 +268,85 @@ namespace SimpleOMS.ViewModel
             SelectedCustomer = Customers.FirstOrDefault();
         }
 
-        private void EditCustomer()
-        {
-            if (SelectedCustomer == null)
+        private void Edit()
+        {            
+            if ((!EditingOrder && SelectedCustomer == null || (EditingOrder && SelectedOrder == null)))
             {
+                MessageBox.Show(String.Format("Please select a {0} to edit.", (EditingOrder ? "order" : "customer")));
                 return;
             }
-            EditingOrder = false;
-        }
-
-        private void NewCustomer()
-        {
-            var customer = new Customer { CustomerID = RandomHelper.GetRandomInt(1000, 99999), FirstName="", LastName ="", MiddleInitial=' ' };
-            EditingOrder = false;
-        }
-
-        private void DeleteOrder()
-        {
-            // Implement delete order logic
-            if(SelectedOrder == null)
-            {
-                return;
-            }
-            Orders.Remove(SelectedOrder);
-            _crudService.OrdersDELETEAsync(SelectedOrder.OrderID);
-        }
-
-        private void CreateNewOrder()
-        {
             EditModeOn = true;
-            var order = new Model.Order { OrderID = RandomHelper.GetRandomInt(1000, 99999), SalesPersonID = _salesPersonID, OrderDate = DateTime.Now };
-            SelectedOrder = order;
         }
 
-        private async void SaveOrder()
+        private void Delete()
         {
             if (EditingOrder)
             {
-                
+                if (SelectedOrder == null)
+                {
+                    MessageBox.Show("Please select an order to delete.");
+                    return;
+                }
 
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this order?", "Delete Order", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    Orders.Remove(SelectedOrder);
+                    _crudService.OrdersDELETEAsync(SelectedOrder.OrderID);
+                }
+            }
+            else
+            {
+                if (SelectedCustomer == null)
+                {                    
+                    return;
+                }
+                if (Orders.Any(o => o.CustomerID == SelectedCustomer.CustomerID))
+                {
+                    MessageBox.Show("Cannot delete customer with orders.");
+                    return;
+                }
+
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this customer?", "Delete Customer", MessageBoxButton.YesNo);
+                if(result == MessageBoxResult.Yes)
+                {
+                    _crudService.CustomersDELETEAsync(SelectedCustomer.CustomerID);
+                    Customers.Remove(SelectedCustomer);
+                }
+            }
+        }
+
+        private void New()
+        {
+            EditModeOn = true;
+            if(EditingOrder)
+            {
+                var order = new Model.Order { OrderID = RandomHelper.GetRandomInt(1000, 99999), SalesPersonID = _salesPersonID, OrderDate = DateTime.Now };
+                SelectedOrder = order;
+            }
+            else
+            {
+                var customer = new Customer { CustomerID = RandomHelper.GetRandomInt(1000, 99999), FirstName = "", LastName = "", MiddleInitial = 'X' };
+                SelectedCustomer = customer;
+            }
+        }
+
+        private async void Save()
+        {            
+            if (EditingOrder)
+            {                
+                if(SelectedOrder == null)
+                {
+                    return;
+                }
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to save this order?", "Save Order", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
                 if (!Orders.Contains(SelectedOrder))
                 {
+                   
                     await _crudService.OrdersPOSTAsync(
                     new CrudServiceClient.Order
                     {
@@ -342,7 +376,17 @@ namespace SimpleOMS.ViewModel
             }
             else
             {
-                if(!Customers.Contains(SelectedCustomer))
+                if (SelectedCustomer == null)
+                {
+                    return;
+                }
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to save this customer?", "Save Customer", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+
+                if (!Customers.Contains(SelectedCustomer))
                 {
                     await _crudService.CustomersPOSTAsync(
                     new CrudServiceClient.Customer

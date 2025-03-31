@@ -9,6 +9,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <helpers:InvertVisibilityConverter x:Key="InvertVis" />
+        <helpers:InverseBooleanConverter x:Key="InverseBool" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -33,7 +34,7 @@
                     <RowDefinition Height="25"/>
                 </Grid.RowDefinitions>
                 <GroupBox Grid.Row="0" Header="Orders">
-                    <DataGrid ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                    <DataGrid ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}" CanUserAddRows="False" IsReadOnly="True" CanUserDeleteRows="False" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Order ID" Binding="{Binding OrderID}"/>
                             <DataGridTextColumn Header="Order Date" Binding="{Binding OrderDate}"/>
@@ -72,7 +73,7 @@
                                 <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedCustomer.FullName, Mode=OneWay}" IsEnabled="False"/>
                                 <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Products}" DisplayMemberPath="Name" SelectedValue="{Binding SelectedProduct}" IsEnabled="{Binding EditModeOn}"/>
                                 <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedProduct.Price}" IsEnabled="False" />
-                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SelectedOrder.Quantity}"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SelectedOrder.Quantity}" IsEnabled="{Binding EditModeOn}"/>
                                 <!-- TODO: Validate numbers-->
                             </Grid>
                         </GroupBox>
@@ -98,9 +99,9 @@
                                 <Label Grid.Row="3" Grid.Column="0" Content="Last Name"/>
 
                                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedCustomer.CustomerID}" IsEnabled="False"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedCustomer.FirstName}" />
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedCustomer.MiddleInitial}"  MaxLength="1"/>
-                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedCustomer.LastName}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedCustomer.FirstName}" IsEnabled="{Binding EditModeOn}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedCustomer.MiddleInitial}"  MaxLength="1" IsEnabled="{Binding EditModeOn}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedCustomer.LastName}" IsEnabled="{Binding EditModeOn}"/>
                             </Grid>
                         </GroupBox>
                     </TabItem>
@@ -111,10 +112,12 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Content="Delete" Width="80" HorizontalAlignment="Left" Margin="2,2,2,2" Command="{Binding DeleteOrderCommand}"/>
-                    <Button Grid.Column="1" Content="Create" Width="120" HorizontalAlignment="Left" Margin="2,2,2,2" Command="{Binding CreateNewOrderCommand}"/>
-                    <Button Grid.Column="2" Content="Save" Width="90" HorizontalAlignment="Right" Margin="2,2,2,2" Command="{Binding SaveOrderCommand}"/>
+                    <Button Grid.Column="0" Content="Delete" Width="80" HorizontalAlignment="Left" Margin="2,2,2,2" IsEnabled="{Binding EditModeOn, Converter={StaticResource InverseBool}}" Command="{Binding DeleteCommand}"/>
+                    <Button Grid.Column="1" Content="Edit" Width="80" HorizontalAlignment="Left" Margin="2,2,2,2" IsEnabled="{Binding EditModeOn, Converter={StaticResource InverseBool}}" Command="{Binding EditCommand}"/>
+                    <Button Grid.Column="2" Content="Create New" Width="100" HorizontalAlignment="Left" Margin="2,2,2,2" IsEnabled="{Binding EditModeOn, Converter={StaticResource InverseBool}}" Command="{Binding NewCommand}"/>
+                    <Button Grid.Column="3" Content="Save" Width="80" HorizontalAlignment="Right" Margin="2,2,2,2" IsEnabled="{Binding EditModeOn}" Command="{Binding SaveCommand}"/>
                 </Grid>
 
 

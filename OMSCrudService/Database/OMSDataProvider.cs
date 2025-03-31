@@ -185,9 +185,10 @@ namespace OMSCrudService.Database
 
                 var command = connection.CreateCommand();
                 command.CommandText = 
-                    @"INSERT INTO Customers (FirstName, LastName, MiddleInitial) VALUES ($firstName, $lastName, $middleInitial);
+                    @"INSERT INTO Customers (CustomerID, FirstName, LastName, MiddleInitial) VALUES ($custID, $firstName, $lastName, $middleInitial);
                       SELECT last_insert_rowid();";
 
+                command.Parameters.AddWithValue("custID", customer.CustomerID);
                 command.Parameters.AddWithValue("$firstName", customer.FirstName);
                 command.Parameters.AddWithValue("$lastName", customer.LastName);
                 command.Parameters.AddWithValue("$middleInitial", customer.MiddleInitial);

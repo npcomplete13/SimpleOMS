@@ -39,7 +39,7 @@ namespace OMSCrudService.Controllers
         public async Task<ActionResult<Customer>> CreateCustomer(Customer customer)
         {
             var createdCustomer = await _dataprovider.CreateCustomer(customer);
-            return CreatedAtAction(nameof(GetCustomer), new { id = createdCustomer.CustomerID }, createdCustomer);
+            return Ok(createdCustomer); ;
         }
 
         [HttpPut("customers/{id}")]
